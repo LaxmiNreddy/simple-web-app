@@ -1,8 +1,1448 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<application>
-    <name>My Argo CD App</name>
-    <title>Hello World!</title>
-    <message>My first application deployed using Argo CD.</message>
-    <status>Running</status>
-</application>
+    <title>Docker Desktop + Kubernetes + Argo CD Complete Guide</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f9;
+            color: #172033;
+            line-height: 1.7;
+        }
+
+        header {
+            background: linear-gradient(135deg, #101827, #294a9b);
+            color: white;
+            padding: 50px 8%;
+        }
+
+        header h1 {
+            font-size: 38px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 18px;
+            max-width: 950px;
+            color: #dce5ff;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: white;
+            border-bottom: 1px solid #ddd;
+            padding: 14px 8%;
+        }
+
+        nav a {
+            margin-right: 20px;
+            color: #2455c3;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        section {
+            background: white;
+            margin-bottom: 25px;
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.06);
+        }
+
+        h2 {
+            color: #203d82;
+            border-bottom: 2px solid #e5e9f2;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #315bb8;
+        }
+
+        pre {
+            background: #101827;
+            color: #e8edf7;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+
+        code {
+            font-family: Consolas, Monaco, monospace;
+        }
+
+        .inline-code {
+            background: #eef2ff;
+            padding: 3px 6px;
+            border-radius: 5px;
+        }
+
+        .note {
+            background: #fff8dc;
+            border-left: 5px solid #e5a500;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .success {
+            background: #e8fff5;
+            border-left: 5px solid #0b8f68;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .danger {
+            background: #fff0f0;
+            border-left: 5px solid #d33;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+        }
+
+        .card {
+            background: #f8faff;
+            border: 1px solid #dce3f0;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .flow {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            margin: 25px 0;
+        }
+
+        .flow-box {
+            background: #eef3ff;
+            border: 1px solid #b9c9ed;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .arrow {
+            font-size: 25px;
+            color: #52637f;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            border: 1px solid #dce1e9;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #eef2f8;
+        }
+
+        a {
+            color: #1856c7;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: #68758a;
+        }
+
+        .command-title {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+
+    <h1>Docker Desktop + Kubernetes + Argo CD</h1>
+
+    <p>
+        Complete beginner-friendly guide for setting up a local Kubernetes
+        environment using Docker Desktop and deploying applications using Argo CD.
+    </p>
+
+</header>
+
+
+<nav>
+
+    <a href="#architecture">Architecture</a>
+
+    <a href="#docker">Docker Desktop</a>
+
+    <a href="#kubernetes">Kubernetes</a>
+
+    <a href="#argocd">Argo CD</a>
+
+    <a href="#commands">Commands</a>
+
+    <a href="#gitops">GitOps</a>
+
+    <a href="#troubleshooting">Troubleshooting</a>
+
+    <a href="#web">Web Resources</a>
+
+</nav>
+
+
+<main>
+
+
+<!-- ====================================================== -->
+<!-- ARCHITECTURE -->
+<!-- ====================================================== -->
+
+<section id="architecture">
+
+<h2>1. Overall Architecture</h2>
+
+<p>
+The complete local setup can be understood using the following flow:
+</p>
+
+<div class="flow">
+
+    <div class="flow-box">
+        Developer Laptop
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        Docker Desktop
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        Kubernetes Cluster
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        Argo CD
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        Application
+    </div>
+
+</div>
+
+<h3>GitOps Flow</h3>
+
+<div class="flow">
+
+    <div class="flow-box">
+        Developer
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        Git Repository
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        Argo CD
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        Kubernetes
+    </div>
+
+    <div class="arrow">→</div>
+
+    <div class="flow-box">
+        Application Pods
+    </div>
+
+</div>
+
+<div class="success">
+
+<strong>Simple mental model:</strong>
+
+<br><br>
+
+Docker runs containers.
+
+<br>
+
+Kubernetes manages containers/workloads.
+
+<br>
+
+Git stores the desired deployment configuration.
+
+<br>
+
+Argo CD continuously makes Kubernetes match Git.
+
+</div>
+
+</section>
+
+
+<!-- ====================================================== -->
+<!-- DOCKER -->
+<!-- ====================================================== -->
+
+<section id="docker">
+
+<h2>2. Docker Desktop Setup</h2>
+
+<p>
+Docker Desktop provides a convenient local environment for running
+containers and, when Kubernetes is enabled, a local Kubernetes cluster.
+</p>
+
+<h3>Install Docker Desktop</h3>
+
+<p>
+Download Docker Desktop from the official Docker website:
+</p>
+
+<p>
+<a href="https://www.docker.com/products/docker-desktop/"
+target="_blank">
+Docker Desktop
+</a>
+</p>
+
+<h3>After installation</h3>
+
+<ol>
+
+<li>Start Docker Desktop.</li>
+
+<li>Wait until Docker Desktop reports that Docker is running.</li>
+
+<li>Open Docker Desktop settings.</li>
+
+<li>Open the Kubernetes section.</li>
+
+<li>Enable/create the local Kubernetes cluster.</li>
+
+<li>Wait until Kubernetes becomes ready.</li>
+
+</ol>
+
+<h3>Verify Docker</h3>
+
+<pre><code>docker version</code></pre>
+
+<pre><code>docker info</code></pre>
+
+<pre><code>docker ps</code></pre>
+
+<h3>What does docker ps show?</h3>
+
+<p>
+It shows the containers currently running through Docker.
+</p>
+
+</section>
+
+
+<!-- ====================================================== -->
+<!-- KUBERNETES -->
+<!-- ====================================================== -->
+
+<section id="kubernetes">
+
+<h2>3. Kubernetes Setup</h2>
+
+<p>
+Kubernetes is responsible for managing application workloads.
+Docker Desktop can provide a local Kubernetes cluster for development.
+</p>
+
+<h3>Check kubectl</h3>
+
+<pre><code>kubectl version --client</code></pre>
+
+<h3>Check Kubernetes context</h3>
+
+<pre><code>kubectl config get-contexts</code></pre>
+
+<h3>Check current context</h3>
+
+<pre><code>kubectl config current-context</code></pre>
+
+<p>
+If Docker Desktop's Kubernetes context is available, it is commonly named:
+</p>
+
+<pre><code>docker-desktop</code></pre>
+
+<p>You can select it with:</p>
+
+<pre><code>kubectl config use-context docker-desktop</code></pre>
+
+<h3>Check Kubernetes cluster</h3>
+
+<pre><code>kubectl cluster-info</code></pre>
+
+<h3>Check nodes</h3>
+
+<pre><code>kubectl get nodes</code></pre>
+
+<p>
+The node should normally show:
+</p>
+
+<pre><code>STATUS
+Ready</code></pre>
+
+</section>
+
+
+<!-- ====================================================== -->
+<!-- K8S OBJECTS -->
+<!-- ====================================================== -->
+
+<section>
+
+<h2>4. Important Kubernetes Components</h2>
+
+<table>
+
+<tr>
+<th>Component</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>Cluster</td>
+<td>The complete Kubernetes environment.</td>
+</tr>
+
+<tr>
+<td>Node</td>
+<td>Machine/environment where workloads run.</td>
+</tr>
+
+<tr>
+<td>Namespace</td>
+<td>Logical separation of Kubernetes resources.</td>
+</tr>
+
+<tr>
+<td>Pod</td>
+<td>Smallest deployable Kubernetes unit.</td>
+</tr>
+
+<tr>
+<td>Deployment</td>
+<td>Maintains application Pods and their desired state.</td>
+</tr>
+
+<tr>
+<td>Service</td>
+<td>Provides stable networking to Pods.</td>
+</tr>
+
+<tr>
+<td>ConfigMap</td>
+<td>Stores non-sensitive configuration.</td>
+</tr>
+
+<tr>
+<td>Secret</td>
+<td>Stores sensitive configuration data.</td>
+</tr>
+
+<tr>
+<td>Ingress</td>
+<td>Routes external HTTP/HTTPS traffic to services.</td>
+</tr>
+
+</table>
+
+<h3>Basic Kubernetes Commands</h3>
+
+<pre><code>kubectl get namespaces</code></pre>
+
+<pre><code>kubectl get pods -A</code></pre>
+
+<pre><code>kubectl get deployments -A</code></pre>
+
+<pre><code>kubectl get services -A</code></pre>
+
+<pre><code>kubectl get nodes</code></pre>
+
+</section>
+
+
+<!-- ====================================================== -->
+<!-- ARGO CD -->
+<!-- ====================================================== -->
+
+<section id="argocd">
+
+<h2>5. Argo CD Setup</h2>
+
+<p>
+Argo CD is a GitOps continuous delivery tool for Kubernetes.
+</p>
+
+<h3>Step 1 — Create Argo CD Namespace</h3>
+
+<pre><code>kubectl create namespace argocd</code></pre>
+
+<h3>Step 2 — Install Argo CD</h3>
+
+<p>
+This is the command you started with:
+</p>
+
+<pre><code>kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml</code></pre>
+
+<h3>Step 3 — Check Argo CD Pods</h3>
+
+<pre><code>kubectl get pods -n argocd</code></pre>
+
+<p>
+Wait until the required Pods become ready.
+</p>
+
+<h3>Step 4 — Check all Argo CD resources</h3>
+
+<pre><code>kubectl get all -n argocd</code></pre>
+
+<h3>Step 5 — Check Services</h3>
+
+<pre><code>kubectl get svc -n argocd</code></pre>
+
+<h3>Step 6 — Check Deployments</h3>
+
+<pre><code>kubectl get deployments -n argocd</code></pre>
+
+<h3>Step 7 — Check Pods</h3>
+
+<pre><code>kubectl get pods -n argocd</code></pre>
+
+</section>
+
+
+<!-- ====================================================== -->
+<!-- ARGO COMPONENTS -->
+<!-- ====================================================== -->
+
+<section>
+
+<h2>6. Argo CD Components</h2>
+
+<div class="grid">
+
+<div class="card">
+
+<h3>argocd-server</h3>
+
+<p>
+Provides the Argo CD API server and Web UI.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>argocd-repo-server</h3>
+
+<p>
+Connects to repositories and renders application manifests.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>argocd-application-controller</h3>
+
+<p>
+Compares desired state with the live Kubernetes state and performs reconciliation.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>argocd-redis</h3>
+
+<p>
+Provides caching support for Argo CD.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>argocd-dex-server</h3>
+
+<p>
+Used for authentication and identity integrations where configured.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>ApplicationSet Controller</h3>
+
+<p>
+Helps generate and manage multiple Argo CD Applications.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ====================================================== -->
+<!-- PASSWORD -->
+<!-- ====================================================== -->
+
+<section>
+
+<h2>7. Get Argo CD Admin Password</h2>
+
+<p>
+The initial installation creates an initial admin Secret.
+</p>
+
+<h3>PowerShell / Linux-style command</h3>
+
+<pre><code>kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}"</code></pre>
+
+<p>
+The value is Base64 encoded.
+</p>
+
+<h3>Linux/macOS decoding</h3>
+
+<pre><code>kubectl -n argocd get secret argocd-initial-admin-secret \
+-o jsonpath="{.data.password}" | base64 -d</code></pre>
+
+<p>
+Username:
+</p>
+
+<pre><code>admin</code></pre>
+
+</section>
+
+
+<!-- ====================================================== -->
+<!-- PORT FORWARD -->
+<!-- ====================================================== -->
+
+<section>
+
+<h2>8. Open Argo CD Web UI</h2>
+
+<p>
+For a local setup, the easiest way to access Argo CD is port forwarding.
+</p>
+
+<pre><code>kubectl port-forward svc/argocd-server -n argocd 8080:443</code></pre>
+
+<p>
+Then open:
+</p>
+
+<pre><code>https://localhost:8080</code></pre>
+
+<div class="note">
+
+Your browser may show a certificate warning because the local
+Argo CD server commonly uses a self-signed certificate.
+
+</div>
+
+</section>
+
+
+<!-- ====================================================== -->
+<!-- ARGO CLI -->
+<!-- ====================================================== -->
+
+<section>
+
+<h2>9. Argo CD CLI</h2>
+
+<h3>Check CLI</h3>
+
+<pre><code>argocd version</code></pre>
+
+<h3>Login</h3>
+
+<pre><code>argocd login localhost:8080 --username admin --insecure</code></pre>
+
+<h3>List Applications</h3>
+
+<pre><code>argocd app list</code></pre>
+
+<h3>Get Application</h3>
+
+<pre><code>argocd app get guestbook</code></pre>
+
+<h3>Synchronize Application</h3>
+
+<pre><code>argocd app sync guestbook</code></pre>
+
+</section>
+
+
+<!-- ====================================================== -->
+<!-- GITOPS -->
+<!-- ====================================================== -->
+
+<section id="gitops">
+
+<h2>10. GitOps — How Argo CD Works</h2>
+
+<p>
+The most important concept to understand is the difference between
+desired state and live state.
+</p>
+
+<table>
+
+<tr>
+<th>Concept</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>Desired State</td>
+<td>Configuration stored in Git.</td>
+</tr>
+
+<tr>
+<td>Live State</td>
+<td>What currently exists in Kubernetes.</td>
+</tr>
+
+<tr>
+<td>Synced</td>
+<td>Desired state and live state match.</td>
+</tr>
+
+<tr>
+<td>OutOfSync</td>
+<td>They are different.</td>
+</tr>
+
+<tr>
+<td>Healthy</td>
+<td>Application resources are considered healthy.</td>
+</tr>
+
+<tr>
+<td>Degraded</td>
+<td>One or more resources have health problems.</td>
+</tr>
+
+</table>
+
+<h3>GitOps Flow</h3>
+
+<div class="flow">
+
+<div class="flow-box">
+Developer changes YAML
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Git commit
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Git push
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Argo CD detects change
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Kubernetes updated
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ====================================================== -->
+<!-- APPLICATION -->
+<!-- ====================================================== -->
+
+<section>
+
+<h2>11. Example Argo CD Application</h2>
+
+<p>
+Create a file called:
+</p>
+
+<pre><code>application.yaml</code></pre>
+
+<p>Example:</p>
+
+<pre><code>apiVersion: argoproj.io/v1alpha1
+kind: Application
+
+metadata:
+  name: guestbook
+  namespace: argocd
+
+spec:
+
+  project: default
+
+  source:
+    repoURL: https://github.com/argoproj/argocd-example-apps.git
+    targetRevision: HEAD
+    path: guestbook
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: guestbook
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true</code></pre>
+
+<h3>Apply Application</h3>
+
+<pre><code>kubectl apply -n argocd -f application.yaml</code></pre>
+
+<h3>Check Application</h3>
+
+<pre><code>kubectl get applications -n argocd</code></pre>
+
+<pre><code>kubectl get application guestbook -n argocd</code></pre>
+
+</section>
+
+
+<!-- ====================================================== -->
+<!-- APPLICATION FLOW -->
+<!-- ====================================================== -->
+
+<section>
+
+<h2>12. Application Deployment Flow</h2>
+
+<div class="flow">
+
+<div class="flow-box">
+Git Repository
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Argo CD Repo Server
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Argo CD Controller
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Kubernetes API
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Deployment
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Pod
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Container
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ====================================================== -->
+<!-- COMMANDS -->
+<!-- ====================================================== -->
+
+<section id="commands">
+
+<h2>13. Complete Command Cheat Sheet</h2>
+
+<h3 class="command-title">Docker</h3>
+
+<pre><code>docker version
+docker info
+docker ps
+docker images</code></pre>
+
+<h3 class="command-title">Kubernetes</h3>
+
+<pre><code>kubectl version --client
+kubectl config get-contexts
+kubectl config current-context
+kubectl get nodes
+kubectl get namespaces
+kubectl get pods -A
+kubectl get deployments -A
+kubectl get services -A</code></pre>
+
+<h3 class="command-title">Argo CD Namespace</h3>
+
+<pre><code>kubectl get pods -n argocd
+kubectl get svc -n argocd
+kubectl get deployments -n argocd
+kubectl get all -n argocd</code></pre>
+
+<h3 class="command-title">Argo CD UI</h3>
+
+<pre><code>kubectl port-forward svc/argocd-server -n argocd 8080:443</code></pre>
+
+<h3 class="command-title">Argo CD CLI</h3>
+
+<pre><code>argocd version
+argocd login localhost:8080 --username admin --insecure
+argocd app list
+argocd app get guestbook
+argocd app sync guestbook</code></pre>
+
+</section>
+
+
+<!-- ====================================================== -->
+<!-- TROUBLESHOOT -->
+<!-- ====================================================== -->
+
+<section id="troubleshooting">
+
+<h2>14. Troubleshooting</h2>
+
+<h3>Problem: Kubernetes is not running</h3>
+
+<pre><code>kubectl get nodes</code></pre>
+
+<p>
+If the command cannot connect to the cluster, check Docker Desktop
+and Kubernetes settings.
+</p>
+
+<h3>Problem: Wrong Kubernetes context</h3>
+
+<pre><code>kubectl config get-contexts</code></pre>
+
+<pre><code>kubectl config current-context</code></pre>
+
+<p>
+Select the correct context if required:
+</p>
+
+<pre><code>kubectl config use-context docker-desktop</code></pre>
+
+<h3>Problem: Argo CD Pods are not running</h3>
+
+<pre><code>kubectl get pods -n argocd</code></pre>
+
+<p>Then:</p>
+
+<pre><code>kubectl describe pod &lt;pod-name&gt; -n argocd</code></pre>
+
+<p>And:</p>
+
+<pre><code>kubectl logs &lt;pod-name&gt; -n argocd</code></pre>
+
+<h3>Check events</h3>
+
+<pre><code>kubectl get events -n argocd --sort-by=.lastTimestamp</code></pre>
+
+<h3>Problem: Port 8080 already used</h3>
+
+<p>
+Use another local port:
+</p>
+
+<pre><code>kubectl port-forward svc/argocd-server -n argocd 8090:443</code></pre>
+
+<p>
+Then open:
+</p>
+
+<pre><code>https://localhost:8090</code></pre>
+
+<h3>Check Argo CD service</h3>
+
+<pre><code>kubectl get svc argocd-server -n argocd</code></pre>
+
+</section>
+
+
+<!-- ====================================================== -->
+<!-- LOCAL VS PROD -->
+<!-- ====================================================== -->
+
+<section>
+
+<h2>15. Local vs Production</h2>
+
+<table>
+
+<tr>
+<th>Local Development</th>
+<th>Production</th>
+</tr>
+
+<tr>
+<td>Docker Desktop Kubernetes</td>
+<td>Enterprise / managed Kubernetes cluster</td>
+</tr>
+
+<tr>
+<td>Port forwarding</td>
+<td>Ingress / Load Balancer</td>
+</tr>
+
+<tr>
+<td>Simple local configuration</td>
+<td>Enterprise security configuration</td>
+</tr>
+
+<tr>
+<td>Non-HA Argo CD can be used for learning/testing</td>
+<td>HA architecture should be considered</td>
+</tr>
+
+<tr>
+<td>Local Git repository</td>
+<td>Enterprise Git repository</td>
+</tr>
+
+<tr>
+<td>Local credentials</td>
+<td>RBAC / SSO / controlled secrets</td>
+</tr>
+
+</table>
+
+<div class="danger">
+
+<strong>Important:</strong>
+
+A local Docker Desktop + Argo CD setup should not simply be copied
+into production. Production environments require appropriate
+security, RBAC, availability, monitoring, networking, credentials,
+backup and upgrade strategies.
+
+</div>
+
+</section>
+
+
+<!-- ====================================================== -->
+<!-- DOCKER VS K8S VS ARGO -->
+<!-- ====================================================== -->
+
+<section>
+
+<h2>16. Docker vs Kubernetes vs Argo CD</h2>
+
+<table>
+
+<tr>
+<th>Technology</th>
+<th>Main Responsibility</th>
+</tr>
+
+<tr>
+<td>Docker</td>
+<td>Builds and runs containers.</td>
+</tr>
+
+<tr>
+<td>Kubernetes</td>
+<td>Manages application workloads and containers.</td>
+</tr>
+
+<tr>
+<td>Git</td>
+<td>Stores desired application/deployment configuration.</td>
+</tr>
+
+<tr>
+<td>Argo CD</td>
+<td>Synchronizes Kubernetes with Git.</td>
+</tr>
+
+</table>
+
+<h3>Simple Example</h3>
+
+<p>
+Imagine your application is a Java Spring Boot service.
+</p>
+
+<div class="flow">
+
+<div class="flow-box">
+Spring Boot JAR
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Docker Image
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Kubernetes Pod
+</div>
+
+<div class="arrow">→</div>
+
+<div class="flow-box">
+Kubernetes Service
+</div>
+
+</div>
+
+<p>
+Argo CD is responsible for ensuring that the Kubernetes resources
+defined in Git are actually deployed in the cluster.
+</p>
+
+</section>
+
+
+<!-- ====================================================== -->
+<!-- LEARNING -->
+<!-- ====================================================== -->
+
+<section>
+
+<h2>17. Recommended Learning Order</h2>
+
+<ol>
+
+<li>Understand Docker images.</li>
+
+<li>Understand Docker containers.</li>
+
+<li>Install and understand Docker Desktop.</li>
+
+<li>Enable Kubernetes in Docker Desktop.</li>
+
+<li>Learn Kubernetes Namespace.</li>
+
+<li>Learn Pod.</li>
+
+<li>Learn Deployment.</li>
+
+<li>Learn Service.</li>
+
+<li>Practice kubectl commands.</li>
+
+<li>Create the <code>argocd</code> namespace.</li>
+
+<li>Install Argo CD.</li>
+
+<li>Understand Argo CD components.</li>
+
+<li>Open the Argo CD Web UI.</li>
+
+<li>Connect Argo CD to Git.</li>
+
+<li>Create an Argo CD Application.</li>
+
+<li>Understand Sync and OutOfSync.</li>
+
+<li>Understand automated synchronization.</li>
+
+<li>Learn Helm/Kustomize after understanding the basic flow.</li>
+
+</ol>
+
+</section>
+
+
+<!-- ====================================================== -->
+<!-- WEB RESOURCES -->
+<!-- ====================================================== -->
+
+<section id="web">
+
+<h2>18. Official Web Resources</h2>
+
+<div class="grid">
+
+<div class="card">
+
+<h3>Docker</h3>
+
+<p>
+<a href="https://www.docker.com/products/docker-desktop/"
+target="_blank">
+Docker Desktop
+</a>
+</p>
+
+<p>
+<a href="https://docs.docker.com/desktop/"
+target="_blank">
+Docker Desktop Documentation
+</a>
+</p>
+
+<p>
+<a href="https://docs.docker.com/desktop/use-desktop/kubernetes/"
+target="_blank">
+Docker Desktop Kubernetes
+</a>
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h3>Kubernetes</h3>
+
+<p>
+<a href="https://kubernetes.io/docs/"
+target="_blank">
+Kubernetes Documentation
+</a>
+</p>
+
+<p>
+<a href="https://kubernetes.io/docs/reference/kubectl/"
+target="_blank">
+kubectl Reference
+</a>
+</p>
+
+<p>
+<a href="https://kubernetes.io/docs/reference/kubectl/quick-reference/"
+target="_blank">
+kubectl Quick Reference
+</a>
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h3>Argo CD</h3>
+
+<p>
+<a href="https://argo-cd.readthedocs.io/en/latest/"
+target="_blank">
+Argo CD Documentation
+</a>
+</p>
+
+<p>
+<a href="https://argo-cd.readthedocs.io/en/latest/operator-manual/installation/"
+target="_blank">
+Argo CD Installation
+</a>
+</p>
+
+<p>
+<a href="https://argo-cd.readthedocs.io/en/latest/user-guide/"
+target="_blank">
+Argo CD User Guide
+</a>
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h3>GitOps</h3>
+
+<p>
+<a href="https://opengitops.dev/"
+target="_blank">
+OpenGitOps
+</a>
+</p>
+
+<p>
+<a href="https://git-scm.com/doc"
+target="_blank">
+Git Documentation
+</a>
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ====================================================== -->
+<!-- FINAL -->
+<!-- ====================================================== -->
+
+<section>
+
+<h2>19. Final Mental Model</h2>
+
+<div class="success">
+
+<h3>
+Docker → Kubernetes → Argo CD → Application
+</h3>
+
+<p>
+
+<strong>Docker Desktop</strong>
+provides your local environment.
+
+<br><br>
+
+<strong>Kubernetes</strong>
+runs and manages your application.
+
+<br><br>
+
+<strong>Git</strong>
+contains the desired deployment configuration.
+
+<br><br>
+
+<strong>Argo CD</strong>
+continuously compares Git with Kubernetes and synchronizes the cluster.
+
+</p>
+
+</div>
+
+<h3>The complete flow:</h3>
+
+<pre><code>
+Developer
+    |
+    v
+Git Repository
+    |
+    v
+Argo CD
+    |
+    v
+Kubernetes API
+    |
+    v
+Deployment
+    |
+    v
+Pod
+    |
+    v
+Container
+    |
+    v
+Application
+</code></pre>
+
+</section>
+
+
+</main>
+
+
+<footer>
+
+    <p>
+        Docker Desktop + Kubernetes + Argo CD Learning Guide
+    </p>
+
+    <p>
+        Use official documentation for the latest installation and production guidance.
+    </p>
+
+</footer>
+
+
+</body>
+</html>
