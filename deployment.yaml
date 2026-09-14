@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
         - name: web
-          image: LaxmiNreddy/simple-web-app:1.0
+          image: simple-web-app:1.0
+          imagePullPolicy: Never
           ports:
             - containerPort: 80
 
